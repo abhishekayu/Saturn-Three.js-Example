@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saturn Three.js Example</title>
+  <style>
+    body { margin: 0; }
+  </style>
+</head>
+<body>
+  <script type="module">
+    import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/build/three.module.js';
+
+    // Set up scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create stars
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.1 });
+
+    const starsVertices = [];
+    for (let i = 0; i < 5000; i++) {
+      const x = (Math.random() - 0.5) * 2000;
+      const y = (Math.random() - 0.5) * 2000;
+      const z = (Math.random() - 0.5) * 2000;
+      starsVertices.push(x, y, z);
+    }
+
+    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+    const stars = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(stars);
+
+    // Create Saturn
+    const saturnGeometry = new THREE.SphereGeometry(1.5, 64, 64);
+    const mustardColor = new THREE.Color(0xFFDB58); // Mustard color
+    const radiantWhiteColor = new THREE.Color(0xFFFFFF); // Radiant white color
+    const creamRadiantGrayColor = new THREE.Color(0xB4CDCD); // Cream radiant gray color
+    
+    const saturnMaterial = new THREE.MeshLambertMaterial({ color: creamRadiantGrayColor, emissive: mustardColor });
+
+    const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
+    scene.add(saturn);
+
+    // Create Saturn's ring
+    const ringGeometry = new THREE.RingGeometry(1.8, 2.5, 64);
+    const ringMaterial = new THREE.MeshLambertMaterial({ color: creamRadiantGrayColor, emissive: radiantWhiteColor, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+    
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.rotation.x = Math.PI / 2; // Rotate the ring to be flat
+    scene.add(ring);
+
+    // Position the camera
+    camera.position.z = 7;
+
+    // Add special effects - rotating and pulsating
+    const clock = new THREE.Clock();
+
+    // Render function
+    const render = () => {
+      requestAnimationFrame(render);
+
+      // Rotate Saturn
+      saturn.rotation.y += 0.01;
+
+      // Rotate the ring
+      ring.rotation.x += 0.001;
+
+      // Rotate the stars (for demonstration)
+      stars.rotation.x += 0.0005;
+      stars.rotation.y += 0.0005;
+
+      // Add pulsating effect to Saturn
+      const saturnScale = Math.sin(clock.getElapsedTime()) * 0.2 + 1;
+      saturn.scale.set(saturnScale, saturnScale, saturnScale);
+
+      renderer.render(scene, camera);
+    };
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight;
+
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(newWidth, newHeight);
+    });
+
+    // Start rendering
+    render();
+  </script>
+</body>
+</html>
